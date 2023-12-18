@@ -24,6 +24,22 @@ const CreatePost = () => {
     reactionsElement.current.value = "";
     hashtagsElement.current.value = "";
 
+    fetch("http://127.0.0.1:5000/user/create-post", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: postTitle,
+        body: postBody,
+        userId: userId,
+        reactions: reactions,
+        tags: tags,
+
+        /* other post data */
+      }),
+    })
+      .then((res) => res.json())
+      .then(console.log);
+
     addPost(userId, postTitle, postBody, reactions, tags);
   };
 

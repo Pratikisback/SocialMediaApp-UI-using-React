@@ -1,10 +1,11 @@
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useReducer, useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 export const PostList = createContext({
   postList: [],
   addPost: () => {},
   deletePost: () => {},
-  addInitialsPost: () => {},
+  fetching: false,
 });
 
 const postListReducer = (currentPostList, action) => {
@@ -22,12 +23,13 @@ const postListReducer = (currentPostList, action) => {
 };
 
 const PostListProvider = ({ children }) => {
+  const [fetching, setFetching] = useState(false);
+
   const [postList, dispatchPostList] = useReducer(postListReducer, []);
   const addPost = (userId, postTitle, postBody, reactions, tags) => {
     dispatchPostList({
       type: "ADD_POST",
       payload: {
-        id: Date.now(),
         title: postTitle,
         body: postBody,
         userId: userId,
@@ -52,11 +54,33 @@ const PostListProvider = ({ children }) => {
       payload: { postId },
     });
   };
+  useEffect(() => {
+    setFetching(true);
+    const controller = new AbortController();
+    const signal = controller.signal;
+    let data = { get_posts: true };
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+    fetch("http://127.0.0.1:5000/user/get-posts", options, { signal })
+      .then((res) => res.json())
+      .then((dataa) => {
+        addInitialPosts(dataa.posts);
+        console.log("fetch returned");
+        setFetching(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   return (
-    <PostList.Provider
-      value={{ postList, addPost, deletePost, addInitialPosts }}
-    >
+    <PostList.Provider value={{ postList, addPost, deletePost, fetching }}>
       {children}
     </PostList.Provider>
   );
