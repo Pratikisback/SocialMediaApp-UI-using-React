@@ -3,7 +3,6 @@ import Post from "./Post";
 import { PostList as PostListData } from "../store/PostListProvider";
 import WelcomeMessage from "./WelcomeMessage";
 import LoadingSpinner from "./LoadingSpinner";
-import { v4 as uuidv4 } from "uuid";
 
 const Postlist = () => {
   const { postList, fetching } = useContext(PostListData);
